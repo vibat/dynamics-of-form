@@ -53,15 +53,15 @@ And press enter.  The generated tree should be displayed.
 
 ## Authors
 
-* **Ben Hughson** - *Initial work* - [vibat](https://github.com/vibat)
-* Bernie Lewin - Lead Director 
+* **Ben Hughson** - Programmer - [vibat](https://github.com/vibat)
+* Bernie Lewin - Director 
 
 ## License
 
-This project is licensed under the Apache 2.0 License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the Apache 2.0 License - see the [LICENSE.md](LICENSE) file for details
 
 ## Acknowledgments
 
 * Big thanks to [Tree Layout](https://github.com/abego/treelayout) for the sample code which was modified for use in this project
 * Laws of Form by G. Spencer Brown
-* Louis Kauffman
+* Louis Kauffman for pioneering Form Dynamics
