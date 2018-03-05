@@ -14,9 +14,9 @@ Otherwise you can build the jar using the source.
 
 #### Prerequisites
 
-The build requires TreeLayout to generate the structures created in the form.  
+The build requires [TreeLayout (download)](https://sourceforge.net/projects/treelayout/files/1.0.3/org.abego.treelayout.core-1.0.3.jar/download) to generate the structures created in the form.  
 
-MIGLayout is also referenced to make the GUI. 
+[MIGLayout (download)](http://www.migcalendar.com/miglayout/versions/4.0/miglayout-4.0-swing.jar) is also referenced to make the GUI. 
 
 Both jars must be included if you want to build the app from source.
 
@@ -58,7 +58,7 @@ And press enter.  The generated tree should be displayed.
 
 ## License
 
-This project is licensed under the Apache 2.0 License - see the [LICENSE.md](LICENSE) file for details
+This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENSE) file for details
 
 ## Acknowledgments
 
