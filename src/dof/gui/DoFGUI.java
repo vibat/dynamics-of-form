@@ -40,38 +40,47 @@ import java.awt.Font;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import java.awt.Toolkit;
-import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JCheckBox;
+import javax.swing.border.LineBorder;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 
 public class DoFGUI {
 
 	private JFrame frmDynsOfForm;
 	private JPanel treePanel;
+	private JPanel optionsPanel;
 	private JTextField expression;
-	private JTextField numApprox;
 	private JTextField depth;
 	private JLabel depthLabel;
-	private JLabel numApproxLabel;
+	private JLabel lblColor;
+	private JLabel lblStyle;
+	private JLabel lblDisplay;
+	private JLabel lblError;
 	private JButton saveButton;
 	private JButton infoButton;
+	private JButton buttonColor;
+	private JButton clearPane;
 	private JMenuBar menuBar;
-	private JMenuItem mntmColor;
+	private JMenu mnFile;
 	private JMenuItem mntmAbout;
 	private JMenuItem mntmHelp;
-	private JMenuItem clearPane;
-	private JCheckBoxMenuItem imageGen;
+	private JComboBox<String> modeSelect;
 	private JComboBox<String> colorStyleSelect;
+	private JCheckBox imageGen;
 	private JScrollPane scrollPane;
 	private InfoDialog infoDialog;
 	private HelpDialog helpDialog;
 	private AboutDialog aboutDialog;
 	private JColorChooser ccd;
 
-	private final Color DEFAULT_COLOR = Color.yellow;
+	private final Color DEFAULT_COLOR = Color.cyan;
 	private Color selectedColor = DEFAULT_COLOR;
 
 	private ExpressionParser ep = new ExpressionParser();
@@ -89,7 +98,8 @@ public class DoFGUI {
 
 	// create the NodeExtentProvider for TextInBox nodes
 	private TextInBoxNodeExtentProvider nodeExtentProvider = new TextInBoxNodeExtentProvider();
-	private JLabel lblError;
+
+
 
 	/**
 	 * Launch the application.
@@ -125,11 +135,11 @@ public class DoFGUI {
 		frmDynsOfForm.setBounds(100, 100, 600, 400);
 		frmDynsOfForm.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmDynsOfForm.getContentPane().setLayout(new MigLayout("",
-				"[][60.00,grow,left][180.00][140:140.00,grow][30:30.00][40.00:40]", "[][][][][grow]"));
+				"[][20.00,left][140:n,grow,fill][30:30.00][40.00:40]", "[][1.00][::30.00px][::30.00px][grow]"));
 
 		JLabel expLabel = new JLabel("Expression");
 		expLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		frmDynsOfForm.getContentPane().add(expLabel, "cell 0 0 2 1,alignx center");
+		frmDynsOfForm.getContentPane().add(expLabel, "cell 0 0 2 1,alignx center,aligny center");
 
 		expression = new JTextField();
 		expression.addActionListener(new ActionListener() {
@@ -140,13 +150,26 @@ public class DoFGUI {
 			}
 		});
 		expression.setFont(new Font("Tahoma", Font.PLAIN, 17));
-		frmDynsOfForm.getContentPane().add(expression, "cell 2 0 2 1,growx");
+		frmDynsOfForm.getContentPane().add(expression, "cell 2 0,growx");
 		expression.setColumns(10);
 
 		depthLabel = new JLabel("Depth");
-		frmDynsOfForm.getContentPane().add(depthLabel, "cell 4 0,alignx trailing");
+		frmDynsOfForm.getContentPane().add(depthLabel, "cell 3 0,alignx trailing");
 
 		depth = new JTextField();
+		depth.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent arg0) {
+				try {
+					printDepth = Integer.parseInt(depth.getText());
+					if (exp != null) {
+						generateTree();
+					}
+				} catch (NumberFormatException e) {
+					depth.setText(Integer.toString(printDepth));
+				}
+			}
+		});
 		depth.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ev) {
 				try {
@@ -159,9 +182,21 @@ public class DoFGUI {
 				}
 			}
 		});
+		
 		depth.setText(Integer.toString(printDepth));
-		frmDynsOfForm.getContentPane().add(depth, "cell 5 0,growx");
+		frmDynsOfForm.getContentPane().add(depth, "cell 4 0,growx");
 		depth.setColumns(10);
+
+		lblError = new JLabel("");
+		lblError.setForeground(Color.RED);
+		frmDynsOfForm.getContentPane().add(lblError, "cell 2 1,alignx center");
+
+		infoButton = new JButton("Analysis");
+		infoButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				infoDialog.setVisible(true);
+			}
+		});
 
 		saveButton = new JButton("Save");
 		saveButton.addActionListener(new ActionListener() {
@@ -169,33 +204,72 @@ public class DoFGUI {
 				if (treeLayout != null) {
 					saveFile();
 				}
-
 			}
 		});
+		frmDynsOfForm.getContentPane().add(saveButton, "cell 1 2 1 2,growx,aligny center");
 
-		lblError = new JLabel("");
-		lblError.setForeground(Color.RED);
-		frmDynsOfForm.getContentPane().add(lblError, "cell 2 1 2 1,alignx center");
-		frmDynsOfForm.getContentPane().add(saveButton, "cell 1 3,alignx center");
+		optionsPanel = new JPanel();
+		optionsPanel.setBorder(new LineBorder(new Color(0, 0, 0)));
+		frmDynsOfForm.getContentPane().add(optionsPanel, "cell 2 2 1 2,grow");
+		optionsPanel.setLayout(
+				new MigLayout("", "[131px,grow,fill][119px,grow,fill][98px,grow,fill][114px,grow,fill]", "[25px][]"));
 
-		numApproxLabel = new JLabel("Continued fraction");
-		frmDynsOfForm.getContentPane().add(numApproxLabel, "cell 2 3,alignx center");
+		lblColor = new JLabel("Color Selection");
+		lblColor.setHorizontalAlignment(SwingConstants.CENTER);
+		optionsPanel.add(lblColor, "cell 1 0,alignx center");
 
-		numApprox = new JTextField();
-		numApprox.setEditable(false);
-		frmDynsOfForm.getContentPane().add(numApprox, "cell 3 3,growx");
-		numApprox.setColumns(10);
+		lblStyle = new JLabel("Coloring Style");
+		lblStyle.setHorizontalAlignment(SwingConstants.CENTER);
+		optionsPanel.add(lblStyle, "cell 2 0,alignx center");
 
-		infoButton = new JButton("Information");
-		infoButton.addActionListener(new ActionListener() {
+		lblDisplay = new JLabel("Display Type");
+		lblDisplay.setHorizontalAlignment(SwingConstants.CENTER);
+		optionsPanel.add(lblDisplay, "cell 3 0,alignx center");
+
+		colorStyleSelect = new JComboBox<String>();
+		optionsPanel.add(colorStyleSelect, "cell 2 1,grow");
+		colorStyleSelect.setToolTipText("Color Style");
+		colorStyleSelect.setModel(new DefaultComboBoxModel<String>(new String[] { "Node weight", "Solid Color" }));
+		colorStyleSelect.setSelectedIndex(0);
+		colorStyleSelect.setMaximumRowCount(2);
+
+		modeSelect = new JComboBox<String>();
+		optionsPanel.add(modeSelect, "cell 3 1,grow");
+		modeSelect.setModel(new DefaultComboBoxModel<String>(new String[] { "Standard", "Brownian value" }));
+		modeSelect.setSelectedIndex(0);
+		modeSelect.setMaximumRowCount(2);
+
+		imageGen = new JCheckBox("Display Tree");
+		imageGen.setHorizontalAlignment(SwingConstants.CENTER);
+		optionsPanel.add(imageGen, "cell 0 0 1 2,grow");
+		imageGen.setSelected(true);
+
+		buttonColor = new JButton("");
+		buttonColor.setBackground(selectedColor);
+		buttonColor.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				infoDialog.setVisible(true);
+				Color newColor = JColorChooser.showDialog(frmDynsOfForm, "Color selector", ccd.getColor());
+				if (newColor != null) {
+					selectedColor = newColor;
+					buttonColor.setBackground(selectedColor);
+				}
 			}
 		});
-		frmDynsOfForm.getContentPane().add(infoButton, "cell 4 3 2 1,alignx center");
+		optionsPanel.add(buttonColor, "cell 1 1,grow");
+		buttonColor.setHorizontalAlignment(SwingConstants.LEFT);
+		frmDynsOfForm.getContentPane().add(infoButton, "cell 3 2 2 1,grow");
+
+		clearPane = new JButton("Clear Tree");
+		clearPane.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				treePanel.removeAll();
+				frmDynsOfForm.pack();
+			}
+		});
+		frmDynsOfForm.getContentPane().add(clearPane, "cell 3 3 2 1,grow");
 
 		scrollPane = new JScrollPane();
-		frmDynsOfForm.getContentPane().add(scrollPane, "cell 1 4 5 1,grow");
+		frmDynsOfForm.getContentPane().add(scrollPane, "cell 1 4 4 1,grow");
 
 		treePanel = new JPanel();
 		scrollPane.setViewportView(treePanel);
@@ -203,62 +277,36 @@ public class DoFGUI {
 		menuBar = new JMenuBar();
 		menuBar.setBorderPainted(false);
 		frmDynsOfForm.setJMenuBar(menuBar);
-
-		mntmColor = new JMenuItem("Color");
-		mntmColor.setHorizontalAlignment(SwingConstants.LEFT);
-		mntmColor.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				Color newColor = JColorChooser.showDialog(frmDynsOfForm, "Color selector", ccd.getColor());
-				if (newColor != null) {
-					selectedColor = newColor;
-				}
-			}
-		});
-		menuBar.add(mntmColor);
-
-		colorStyleSelect = new JComboBox<String>();
-		colorStyleSelect.setToolTipText("Color Style");
-		menuBar.add(colorStyleSelect);
-		colorStyleSelect
-				.setModel(new DefaultComboBoxModel<String>(new String[] { "Node weight", "Stemming", "Solid Color" }));
-		colorStyleSelect.setSelectedIndex(2);
-		colorStyleSelect.setMaximumRowCount(3);
-
-		imageGen = new JCheckBoxMenuItem("Image Generation");
-		imageGen.setSelected(true);
-		menuBar.add(imageGen);
-
-		clearPane = new JMenuItem("Clear Pane");
-		clearPane.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				treePanel.removeAll();
-				frmDynsOfForm.pack();
-			}
-		});
-		menuBar.add(clearPane);
-
-		mntmHelp = new JMenuItem("Help");
-		mntmHelp.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
+		
+		mnFile = new JMenu("File");
+		mnFile.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
 				helpDialog.setVisible(true);
 			}
 		});
-		mntmHelp.setHorizontalAlignment(SwingConstants.LEFT);
-		menuBar.add(mntmHelp);
-
+		menuBar.add(mnFile);
+		
 		mntmAbout = new JMenuItem("About");
 		mntmAbout.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
+			public void actionPerformed(ActionEvent e) {
 				aboutDialog.setVisible(true);
 			}
 		});
-		mntmAbout.setHorizontalAlignment(SwingConstants.LEFT);
-		menuBar.add(mntmAbout);
+		mnFile.add(mntmAbout);
+		
+		mntmHelp = new JMenuItem("Help");
+		mntmHelp.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				helpDialog.setVisible(true);
+			}
+		});
+		mnFile.add(mntmHelp);
+
 
 		infoDialog = new InfoDialog();
 		helpDialog = new HelpDialog();
 		aboutDialog = new AboutDialog();
-		
+
 		ccd = new JColorChooser(DEFAULT_COLOR);
 
 		frmDynsOfForm.pack();
@@ -266,10 +314,11 @@ public class DoFGUI {
 
 	private void generateTree() {
 		try {
+			String mode = (String) modeSelect.getSelectedItem();
 			head = ep.build(exp, printDepth);
 			if (imageGen.isSelected()) {
 				TreeForTreeLayout<TextInBox> tree = TreeFactory.createTree(head, selectedColor,
-						(String) colorStyleSelect.getSelectedItem());
+						(String) colorStyleSelect.getSelectedItem(), mode);
 				treeLayout = new TreeLayout<TextInBox>(tree, nodeExtentProvider, configuration);
 
 				treePanel.removeAll();
@@ -277,15 +326,13 @@ public class DoFGUI {
 				frmDynsOfForm.pack();
 			}
 
-			numApprox.setText(String.format("%.9f", FractionalAnalysis.analyse(head)));
-
-			setAdvancedInfo(head);
+			setAdvancedInfo(head, mode);
 
 			if (!lblError.getText().equals("")) {
 				lblError.setText("");
 				frmDynsOfForm.pack();
 			}
-		} catch (InvalidInputException | NoHeadException e) {
+		} catch (InvalidInputException | NoHeadException | ShallowReEntryException e) {
 			lblError.setText(e.getMessage());
 			frmDynsOfForm.pack();
 		}
@@ -318,21 +365,23 @@ public class DoFGUI {
 		}
 	}
 
-	private void setAdvancedInfo(Mark head) {
+	private void setAdvancedInfo(Mark head, String selectedMode) {
 
 		infoDialog.setBracketText(head.bracketPrint());
 		infoDialog.setDepthText(head.print(printDepth));
+		infoDialog.setCFraction(String.format("%.9f", FractionalAnalysis.analyse(head)));
 
 		int[] depthTallies = BasicAnalysis.getDepthTallies(head);
 		int[] gnomon = BasicAnalysis.getGnomon(depthTallies);
 		int[] gnomonInterval = BasicAnalysis.getGnomon(gnomon);
+		int[] thirdDeriv = BasicAnalysis.getGnomon(gnomonInterval);
 
-		infoDialog.setTally(depthTallies);
-		infoDialog.setGnomon(gnomon);
-		infoDialog.setGInterval(gnomonInterval);
-		infoDialog.set3rdDeriv(BasicAnalysis.getGnomon(gnomonInterval));
+		infoDialog.setInfo(depthTallies, gnomon, gnomonInterval, thirdDeriv);
+
+		if (selectedMode.equals("Brownian value")) {
+			infoDialog.setOFraction(String.format("%.9f", FractionalAnalysis.analyseO(head)));
+		} else
+			infoDialog.setOFraction("");
 	}
-
-
 
 }

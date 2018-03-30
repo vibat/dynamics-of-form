@@ -10,11 +10,12 @@ import java.util.Scanner;
 import dof.analysis.FractionalAnalysis;
 import dof.exceptions.InvalidInputException;
 import dof.exceptions.NoHeadException;
+import dof.exceptions.ShallowReEntryException;
 import visualise.Imagify;
 
 /**
  * @author ASUS
- * The class used to parse input from the standard LoF form and build the associated structue
+ * The class used to parse input from the standard LoF form and build the associated structure
  */
 public class ExpressionParser {
 	
@@ -71,7 +72,7 @@ public class ExpressionParser {
 					System.out.println("Building to depth " + printDepth);
 					try {
 						return build(input, printDepth);
-					} catch (InvalidInputException | NoHeadException e) {
+					} catch (InvalidInputException | NoHeadException | ShallowReEntryException e) {
 						return null;
 					}
 				}
@@ -140,7 +141,10 @@ public class ExpressionParser {
 	 * @throws InvalidInputException There is a syntax error
 	 * @throws NoHeadException There is no current head to continue building the expression
 	 */
-	public Mark build(String expression, int depth) throws InvalidInputException, NoHeadException {
+	public Mark build(String expression, int depth) throws InvalidInputException, NoHeadException, ShallowReEntryException {
+		
+		// rid exp of whitespace
+		expression = expression.replaceAll("\\s", "");
 		
 		if (!isValidExpression(expression)) {
 			throw new InvalidInputException();
@@ -174,7 +178,14 @@ public class ExpressionParser {
 					deepHeads.put(markNumber, current);
 				}
 				else if (markNumber <= currentDeepReEntry) {
-					deepHeads.get(markNumber).addTarget(current);
+					// adding a deep re-entry
+					Mark marker = deepHeads.get(markNumber);
+					
+					if (current.depth < marker.depth) {
+						// we're trying to add a target to a shallower space
+						throw new ShallowReEntryException();
+					}
+					marker.addTarget(current);
 					if (deepHeadCounts.get(markNumber) == 0) { current = current.parent; }
 				}
 				else { // markNumber == currentDeepReEntry + 1 
@@ -192,7 +203,7 @@ public class ExpressionParser {
 					current = head;
 				}
 				else if (c.equals("(") || c.equals("[")) {
-					newMark = new Mark(current, depth);
+					newMark = new Mark(current,depth);
 					current.children.add(newMark);
 					current = newMark;
 				}

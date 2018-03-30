@@ -56,7 +56,7 @@ public class AboutDialog extends JDialog {
 		JTextPane txtpnCreatedByBen = new JTextPane();
 		txtpnCreatedByBen.setEditable(false);
 		txtpnCreatedByBen.setBackground(UIManager.getColor("Button.background"));
-		txtpnCreatedByBen.setText("Created by Ben Hughson and Bernie Lewin\r\n\r\nVersion 1.0 released March 2018\r\n\r\nCode available at: https://github.com/vibat/dynamics-of-form");
+		txtpnCreatedByBen.setText("Created by Ben Hughson and Bernie Lewin\r\n\r\nVersion 1.01 released March 2018\r\n\r\nCode available at: https://github.com/vibat/dynamics-of-form");
 		panel.add(txtpnCreatedByBen, "cell 0 2,alignx center,aligny center");
 
 	}

@@ -106,7 +106,7 @@ public class Imagify {
 	
 	@SuppressWarnings("unused")
 	public static void visualise(Mark head) {
-		TreeForTreeLayout<TextInBox> tree = TreeFactory.createTree(head, Color.orange, "solid");
+		TreeForTreeLayout<TextInBox> tree = TreeFactory.createTree(head, Color.orange, "solid", "Standard");
 		
 		// setup the tree layout configuration
 		double gapBetweenLevels = 50;

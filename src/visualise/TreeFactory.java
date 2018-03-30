@@ -45,7 +45,7 @@ public class TreeFactory {
 	 * @param selectedStyle The style of tree coloring selected
 	 * @return a "Sample" tree with {@link TextInBox} items as nodes.
 	 */
-	public static TreeForTreeLayout<TextInBox> createTree(Mark head, Color baseColor, String selectedStyle) {
+	public static TreeForTreeLayout<TextInBox> createTree(Mark head, Color baseColor, String selectedStyle, String selectedMode) {
 		
 		TextInBox root = new TextInBox(head.hasTargets() ? "R" : "M", baseColor , 20, 20);
 		
@@ -53,17 +53,25 @@ public class TreeFactory {
 				root);
 		
 		for (Mark child: head.children) {
-			BuildChild(child, root, tree, baseColor, BasicAnalysis.getTotalNodes(head), selectedStyle);
+			BuildChild(child, root, tree, baseColor, BasicAnalysis.getTotalNodes(head), selectedStyle, selectedMode);
 		}
 		
 		return tree;
 	}
 	
-	private static void BuildChild(Mark current, TextInBox parent, DefaultTreeForTreeLayout<TextInBox> tree, Color baseColor, int maxNodes, String selectedStyle) {
+	private static void BuildChild(Mark current, TextInBox parent, DefaultTreeForTreeLayout<TextInBox> tree, Color baseColor, int maxNodes, String selectedStyle, String selectedMode) {
 		
 		Color color;
 		
-		if (selectedStyle.equals("Node weight")) {
+		if (selectedMode.equals("Brownian value")) {
+			color = new Color(
+					255 - parent.color.getRed(),
+					255 - parent.color.getGreen(),
+					255 - parent.color.getBlue()
+                    );
+		}
+		
+		else if (selectedStyle.equals("Node weight")) {
 			color = Colourise.getWeightedColor(
 					current,
 					Color.RGBtoHSB(
@@ -74,11 +82,6 @@ public class TreeFactory {
 					maxNodes);
 		}
 		
-//		else if (selectedStyle.equals("Marked/unmarked colour")) {
-//			if (current.switched == null) { color = baseColor; }
-//			else { color = current.switched ? baseColor : Color.white; } 
-//		}
-		
 		else {
 			color = baseColor;
 		}
@@ -88,7 +91,7 @@ public class TreeFactory {
 		tree.addChild(parent, node);
 		
 		for (Mark child: current.children) {
-			BuildChild(child, node, tree, baseColor, maxNodes, selectedStyle);
+			BuildChild(child, node, tree, baseColor, maxNodes, selectedStyle, selectedMode);
 		}
 		
 	}
