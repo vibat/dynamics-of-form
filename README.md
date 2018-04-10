@@ -8,7 +8,7 @@ This Java program was developed as a tool to explore the dynamics of form accord
 
 ## Getting Started
 
-The easiest way to run the program is to simply [download the release build](https://github.com/vibat/dynamics-of-form/releases).  Run the .exe and you're good to go!
+The easiest way to run the program is to simply [download the release build](https://github.com/vibat/dynamics-of-form/releases).  Windows users can use the .exe, while Mac users will likely have success with the .jar.  If the .jar isn't running, make sure you have a Java runtime installed ([download](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html)).   
 
 Otherwise you can build the jar using the source. 
 
